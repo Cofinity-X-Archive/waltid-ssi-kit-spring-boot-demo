@@ -36,6 +36,8 @@ public class DidController {
         DidOptions didOptions = new DidWebCreateOptions(domain, didDocumentRequest.getTenant());
         String didString = DidService.INSTANCE.create(DidMethod.web, keyId.getId(), didOptions);
         id.walt.model.Did did = DidService.INSTANCE.load(didString);
+
+        //TODO save in wallet table
         return ResponseEntity.ok(did.encodePretty());
     }
 }

@@ -16,4 +16,6 @@ public class DidDocumentRequest implements Serializable {
 
     private String tenant;
 
+    private String name;
+
 }

@@ -9,25 +9,34 @@ import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import id.walt.servicematrix.ServiceMatrix;
 import id.walt.services.key.KeyService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.text.StringEscapeUtils;
+import org.springdoc.core.properties.SwaggerUiConfigProperties;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.io.IOException;
+import java.util.Objects;
 
 @Configuration
 @Slf4j
-public class ApplicationConfig {
+public class ApplicationConfig implements WebMvcConfigurer {
 
     private final ResourceLoader resourceLoader;
 
     private final ServiceMatrix serviceMatrix;
 
-    public ApplicationConfig(ResourceLoader resourceLoader) throws IOException {
+    private final SwaggerUiConfigProperties properties;
+
+
+    public ApplicationConfig(ResourceLoader resourceLoader, SwaggerUiConfigProperties properties) throws IOException {
         this.resourceLoader = resourceLoader;
+        this.properties = properties;
         Resource fileResource = resourceLoader.getResource("classpath:service-matrix.properties");
         serviceMatrix = new ServiceMatrix(fileResource.getFile().getAbsolutePath());
     }
@@ -56,6 +65,16 @@ public class ApplicationConfig {
     @Bean
     public SpecificationUtil specificationUtil() {
         return new SpecificationUtil<>();
+    }
+
+
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        if(!Objects.isNull(properties)){
+            String redirectUri = properties.getPath();
+            log.info("Set landing page to path {}", StringEscapeUtils.escapeJava(redirectUri));
+            registry.addRedirectViewController("/", redirectUri);
+        }
     }
 
 }

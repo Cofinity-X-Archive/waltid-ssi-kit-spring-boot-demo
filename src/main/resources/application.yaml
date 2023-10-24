@@ -18,6 +18,18 @@ spring:
     password: ${DB_PASSWORD:smart}
     initialization-mode: always
     hikari:
-      maximumPoolSize: ${DB_POOL_SIZE:true}
+      maximumPoolSize: ${DB_POOL_SIZE:10}
   jpa:
     show-sql: false
+
+springdoc:
+  swagger-ui:
+    enabled: ${ENABLE_SWAGGER_UI:true}
+    disable-swagger-default-url: true
+    path: /ui/swagger-ui
+    show-common-extensions: true
+    csrf:
+      enabled: true
+  api-docs:
+    enabled: ${ENABLE_API_DOC:true}
+    path: /docs/api-docs
