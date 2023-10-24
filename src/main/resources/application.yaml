@@ -1,0 +1,23 @@
+server:
+  port: ${APPLICATION_PORT:8080}
+  shutdown: graceful
+  compression:
+    enabled: true
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  profiles:
+    active: ${APPLICATION_ENVIRONMENT:dev}
+  liquibase:
+    change-log: classpath:/db/changelog/changelog-master.xml
+  application:
+    name: miw
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:test}?useSSL=${USE_SSL:false}
+    username: ${DB_USER_NAME:root}
+    password: ${DB_PASSWORD:smart}
+    initialization-mode: always
+    hikari:
+      maximumPoolSize: ${DB_POOL_SIZE:true}
+  jpa:
+    show-sql: false

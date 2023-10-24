@@ -1,0 +1,25 @@
+{
+    "assertionMethod" : [
+        "did:web:localhost:abcdc#2d0d8eb650ad4cf49f929bff63b1982d"
+    ],
+    "authentication" : [
+        "did:web:localhost:abcdc#2d0d8eb650ad4cf49f929bff63b1982d"
+    ],
+    "@context" : "https://www.w3.org/ns/did/v1",
+    "id" : "did:web:localhost:abcdc",
+    "verificationMethod" : [
+        {
+            "controller" : "did:web:localhost:abcdc",
+            "id" : "did:web:localhost:abcdc#2d0d8eb650ad4cf49f929bff63b1982d",
+            "publicKeyJwk" : {
+                "alg" : "EdDSA",
+                "crv" : "Ed25519",
+                "kid" : "2d0d8eb650ad4cf49f929bff63b1982d",
+                "kty" : "OKP",
+                "use" : "sig",
+                "x" : "gNeJylvKov7g0MpOEnXxgPyW_UMzT0DRb0IRlPirZPQ"
+            },
+            "type" : "Ed25519VerificationKey2019"
+        }
+    ]
+}

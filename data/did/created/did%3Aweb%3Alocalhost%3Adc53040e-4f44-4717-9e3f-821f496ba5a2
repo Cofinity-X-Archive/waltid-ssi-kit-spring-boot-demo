@@ -1,0 +1,25 @@
+{
+    "assertionMethod" : [
+        "did:web:localhost:dc53040e-4f44-4717-9e3f-821f496ba5a2#e50d220590b545b9aa1b0d9de9987ec1"
+    ],
+    "authentication" : [
+        "did:web:localhost:dc53040e-4f44-4717-9e3f-821f496ba5a2#e50d220590b545b9aa1b0d9de9987ec1"
+    ],
+    "@context" : "https://www.w3.org/ns/did/v1",
+    "id" : "did:web:localhost:dc53040e-4f44-4717-9e3f-821f496ba5a2",
+    "verificationMethod" : [
+        {
+            "controller" : "did:web:localhost:dc53040e-4f44-4717-9e3f-821f496ba5a2",
+            "id" : "did:web:localhost:dc53040e-4f44-4717-9e3f-821f496ba5a2#e50d220590b545b9aa1b0d9de9987ec1",
+            "publicKeyJwk" : {
+                "alg" : "EdDSA",
+                "crv" : "Ed25519",
+                "kid" : "e50d220590b545b9aa1b0d9de9987ec1",
+                "kty" : "OKP",
+                "use" : "sig",
+                "x" : "-xuFd4UNg0VFjZlUrnHAs3N0WDZnjIV4x7WlSIkjmrU"
+            },
+            "type" : "Ed25519VerificationKey2019"
+        }
+    ]
+}
