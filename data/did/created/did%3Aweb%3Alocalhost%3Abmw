@@ -1,0 +1,25 @@
+{
+    "assertionMethod" : [
+        "did:web:localhost:bmw#a1608505637941bfb2df60454b3598af"
+    ],
+    "authentication" : [
+        "did:web:localhost:bmw#a1608505637941bfb2df60454b3598af"
+    ],
+    "@context" : "https://www.w3.org/ns/did/v1",
+    "id" : "did:web:localhost:bmw",
+    "verificationMethod" : [
+        {
+            "controller" : "did:web:localhost:bmw",
+            "id" : "did:web:localhost:bmw#a1608505637941bfb2df60454b3598af",
+            "publicKeyJwk" : {
+                "alg" : "EdDSA",
+                "crv" : "Ed25519",
+                "kid" : "a1608505637941bfb2df60454b3598af",
+                "kty" : "OKP",
+                "use" : "sig",
+                "x" : "1qWuKHea1B1LMfsLFjMjd2Jnyp-ov3t8BAwJPOCyZWQ"
+            },
+            "type" : "Ed25519VerificationKey2019"
+        }
+    ]
+}

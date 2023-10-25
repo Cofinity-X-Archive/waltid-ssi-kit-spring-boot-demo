@@ -33,3 +33,7 @@ springdoc:
   api-docs:
     enabled: ${ENABLE_API_DOC:true}
     path: /docs/api-docs
+
+ssi:
+  host: ${APPLICATION_HOST:localhost}
+  baseTenant: ${BASE_TENANT:smartSense}

@@ -5,9 +5,6 @@ import com.smartsensesolutions.java.commons.base.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.security.KeyPair;
-import java.util.List;
-
 @Getter
 @Setter
 @Entity

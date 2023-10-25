@@ -1,5 +1,6 @@
 package com.cofinityx.waltid.waltidssikitdemo.dao;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.smartsensesolutions.java.commons.base.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -11,7 +12,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Wallet implements BaseEntity {
+public class HolderCredential implements BaseEntity {
 
     @Id
     @JsonIgnore
@@ -19,16 +20,18 @@ public class Wallet implements BaseEntity {
     @Column(name = "id", columnDefinition = "serial", nullable = false, unique = true)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String tenant;
+    @Column(nullable = false)
+    private String alias;
+
+    @Column(name = "group_name", nullable = false)
+    private String group;
 
     @Column(nullable = false)
-    private String name;
+    private String data;
 
     @Column(nullable = false)
-    private String did;
+    private String credentialId;
 
     @Column(nullable = false)
-    private String didDocument;
-
+    private String issuerId;
 }

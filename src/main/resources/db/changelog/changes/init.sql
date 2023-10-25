@@ -19,11 +19,18 @@ CREATE TABLE public.wallet (
 	tenant varchar(255) NOT NULL,
 	name varchar(255) NOT NULL,
 	did varchar(255) NOT NULL,
-	did_document varchar(255) NOT NULL ,
-	private_key text NOT NULL,
-	public_key text NOT NULL,
-	crypto_provider varchar(255) NOT NULL,
+	did_document text NOT NULL ,
 	CONSTRAINT wallet_uk_did UNIQUE (did),
 	CONSTRAINT uk_tenant UNIQUE (tenant),
 	CONSTRAINT wallet_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.holder_credential (
+	id bigserial NOT NULL,
+	alias varchar(255) NOT NULL,
+	group_name varchar(255) NOT NULL,
+	data text NOT NULL,
+	credential_id varchar(255) NOT NULL,
+	issuer_id varchar(255) NOT NULL,
+	CONSTRAINT holder_credential_pkey PRIMARY KEY (id)
 );

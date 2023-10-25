@@ -1,0 +1,25 @@
+{
+    "assertionMethod" : [
+        "did:web:localhost:smartSense#76fd46a18bc4456fad7d5dcaab359a5b"
+    ],
+    "authentication" : [
+        "did:web:localhost:smartSense#76fd46a18bc4456fad7d5dcaab359a5b"
+    ],
+    "@context" : "https://www.w3.org/ns/did/v1",
+    "id" : "did:web:localhost:smartSense",
+    "verificationMethod" : [
+        {
+            "controller" : "did:web:localhost:smartSense",
+            "id" : "did:web:localhost:smartSense#76fd46a18bc4456fad7d5dcaab359a5b",
+            "publicKeyJwk" : {
+                "alg" : "EdDSA",
+                "crv" : "Ed25519",
+                "kid" : "76fd46a18bc4456fad7d5dcaab359a5b",
+                "kty" : "OKP",
+                "use" : "sig",
+                "x" : "0bkYBrVOG54PKXeVVDeTatvjy1CNDE4fZwXfMWddJbQ"
+            },
+            "type" : "Ed25519VerificationKey2019"
+        }
+    ]
+}

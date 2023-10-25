@@ -27,18 +27,14 @@ import java.util.Objects;
 @Slf4j
 public class ApplicationConfig implements WebMvcConfigurer {
 
-    private final ResourceLoader resourceLoader;
-
-    private final ServiceMatrix serviceMatrix;
 
     private final SwaggerUiConfigProperties properties;
 
 
     public ApplicationConfig(ResourceLoader resourceLoader, SwaggerUiConfigProperties properties) throws IOException {
-        this.resourceLoader = resourceLoader;
         this.properties = properties;
         Resource fileResource = resourceLoader.getResource("classpath:service-matrix.properties");
-        serviceMatrix = new ServiceMatrix(fileResource.getFile().getAbsolutePath());
+        new ServiceMatrix(fileResource.getFile().getAbsolutePath());
     }
 
     @Bean
