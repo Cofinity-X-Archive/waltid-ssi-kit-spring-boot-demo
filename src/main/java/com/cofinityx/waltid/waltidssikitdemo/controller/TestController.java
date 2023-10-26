@@ -162,7 +162,7 @@ public class TestController {
         }
 
         //save VC in wallet
-        VerifiableCredential verifiableCredential = VerifiableCredential.Companion.fromJson(membershipVC);
+        VerifiableCredential verifiableCredential = VerifiableCredential.Companion.fromString(membershipVC);
         holderCredentialRepository.save(HolderCredential.builder()
                         .alias("aa")
                         .group("MembershipCredential")
@@ -176,9 +176,8 @@ public class TestController {
 
 
     @PostMapping(path = "/vc/verify", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<VerificationResult> verifyVC(@RequestBody Map<String, Object> map) throws JsonProcessingException {
-        VerifiableCredential verifiableCredential = VerifiableCredential.Companion.fromJson(objectMapper.writeValueAsString(map));
-
+    public ResponseEntity<VerificationResult> verifyVC(@RequestBody String vc) throws JsonProcessingException {
+        VerifiableCredential verifiableCredential = VerifiableCredential.Companion.fromString(vc);
         //set schema URL, this is not working as they are following different schema type: https://raw.githubusercontent.com/walt-id/waltid-ssikit-vclib/master/src/test/resources/schemas/VerifiableId.json
         JsonSchemaPolicyArg jsonSchemaPolicyArg = new JsonSchemaPolicyArg("https://cofinity-x.github.io/schema-registry/v1.1/businessPartnerData.json");
         //new JsonSchemaPolicy(jsonSchemaPolicyArg) This is not working
