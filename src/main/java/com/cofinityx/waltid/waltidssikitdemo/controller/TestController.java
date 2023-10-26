@@ -32,17 +32,17 @@ import id.walt.signatory.Ecosystem;
 import id.walt.signatory.ProofConfig;
 import id.walt.signatory.ProofType;
 import id.walt.signatory.Signatory;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import kotlin.Unit;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
@@ -183,6 +183,14 @@ public class TestController {
         //new JsonSchemaPolicy(jsonSchemaPolicyArg) This is not working
         VerificationResult verify = Auditor.Companion.getService().verify(verifiableCredential, List.of(new SignaturePolicy()));
         return ResponseEntity.ok(verify);
+    }
+
+    @GetMapping(path ="/{tenant}/did.json", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<id.walt.model.Did> getDidResolve(@Parameter(description = "tenant",examples = {@ExampleObject(name = "tenant", value = "smartsense", description = "tenant")}) @PathVariable(name = "tenant") String tenant) {
+        Wallet holderWallet = walletRepository.getByTenant(tenant);
+        Validate.isNull(holderWallet).launch(new IllegalStateException("Invalid tenant"));
+        Did holderDid = Did.Companion.decode(holderWallet.getDidDocument());
+        return ResponseEntity.status(HttpStatus.OK).body(holderDid);
     }
 
     @EventListener(ApplicationReadyEvent.class)
