@@ -1,6 +1,8 @@
 package com.cofinityx.waltid.waltidssikitdemo.controller;
 
 import com.cofinityx.waltid.waltidssikitdemo.config.ApplicationSettings;
+import com.cofinityx.waltid.waltidssikitdemo.dao.HolderCredential;
+import com.cofinityx.waltid.waltidssikitdemo.dao.HolderCredentialRepository;
 import com.cofinityx.waltid.waltidssikitdemo.dao.Wallet;
 import com.cofinityx.waltid.waltidssikitdemo.dao.WalletRepository;
 import com.cofinityx.waltid.waltidssikitdemo.dto.DidDocumentRequest;
@@ -51,15 +53,17 @@ public class TestController {
     private final ApplicationSettings applicationSettings;
 
     private final WalletRepository walletRepository;
+    private final HolderCredentialRepository holderCredentialRepository;
 
     private final ObjectMapper  objectMapper;
 
     private final SimpleDateFormat simpleDateFormat;
 
-    public TestController(KeyService keyService, ApplicationSettings applicationSettings, WalletRepository walletRepository, ObjectMapper objectMapper) {
+    public TestController(KeyService keyService, ApplicationSettings applicationSettings, WalletRepository walletRepository,HolderCredentialRepository holderCredentialRepository, ObjectMapper objectMapper) {
         this.keyService = keyService;
         this.applicationSettings = applicationSettings;
         this.walletRepository = walletRepository;
+        this.holderCredentialRepository = holderCredentialRepository;
         this.objectMapper = objectMapper;
         simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -92,7 +96,7 @@ public class TestController {
 
 
     @PostMapping(path = "/vc/membership")
-    public ResponseEntity<String> issueVC(@RequestParam(name = "holderTenant") String tenant){
+    public ResponseEntity<String> issueVC(@RequestParam(name = "holderTenant") String tenant) throws JsonProcessingException {
 
         //holder wallet
         Wallet holderWallet = walletRepository.getByTenant(tenant);
@@ -143,7 +147,18 @@ public class TestController {
         //set issuer
         W3CIssuer w3CIssuer = new W3CIssuer(issuedDid.getId());
         String membershipVC = Signatory.Companion.getService().issue(w3CCredentialBuilder, createProofConfig(issuedDid.getId(), holderDid.getId(), ProofType.LD_PROOF, expiration), w3CIssuer, false);
-        //TODO store in holder wallet
+
+        //save cred
+        Map<String, String> mapVal = new ObjectMapper().readValue(membershipVC, Map.class);
+
+        holderCredentialRepository.save(HolderCredential.builder()
+                        .alias("aa")
+                        .group("aa")
+                .credentialId(mapVal.get("id"))
+                .data(membershipVC)
+                .issuerId(issuedDid.getId())
+                .build());
+
         return ResponseEntity.ok(membershipVC);
     }
 
