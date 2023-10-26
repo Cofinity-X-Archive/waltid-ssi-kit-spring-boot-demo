@@ -9,9 +9,17 @@ import com.cofinityx.waltid.waltidssikitdemo.dto.DidDocumentRequest;
 import com.cofinityx.waltid.waltidssikitdemo.utils.Validate;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import id.walt.auditor.Auditor;
+import id.walt.auditor.VerificationResult;
+import id.walt.auditor.policies.JsonSchemaPolicy;
+import id.walt.auditor.policies.JsonSchemaPolicyArg;
+import id.walt.auditor.policies.SignaturePolicy;
+import id.walt.credentials.w3c.VerifiableCredential;
 import id.walt.credentials.w3c.W3CContext;
+import id.walt.credentials.w3c.W3CCredentialSchema;
 import id.walt.credentials.w3c.W3CIssuer;
 import id.walt.credentials.w3c.builder.W3CCredentialBuilder;
+import id.walt.credentials.w3c.templates.VcTemplateService;
 import id.walt.crypto.KeyAlgorithm;
 import id.walt.crypto.KeyId;
 import id.walt.model.Did;
@@ -25,6 +33,7 @@ import id.walt.signatory.ProofConfig;
 import id.walt.signatory.ProofType;
 import id.walt.signatory.Signatory;
 import kotlin.Unit;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -39,10 +48,7 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
-import java.util.TimeZone;
+import java.util.*;
 
 @RestController
 @Slf4j
@@ -95,8 +101,9 @@ public class TestController {
     }
 
 
+    @SneakyThrows
     @PostMapping(path = "/vc/membership")
-    public ResponseEntity<String> issueVC(@RequestParam(name = "holderTenant") String tenant) throws JsonProcessingException {
+    public ResponseEntity<String> issueVC(@RequestParam(name = "holderTenant") String tenant, @RequestParam(name = "asJwt", defaultValue = "false") boolean asJwt){
 
         //holder wallet
         Wallet holderWallet = walletRepository.getByTenant(tenant);
@@ -142,24 +149,41 @@ public class TestController {
         w3CCredentialBuilder.addContext(w3CContext);
 
         //set type
-        w3CCredentialBuilder.getType().add("MembershipCredential");
+        w3CCredentialBuilder.getType().add("MembershipCredential");  //this is not adding in type[]  ??
 
         //set issuer
         W3CIssuer w3CIssuer = new W3CIssuer(issuedDid.getId());
-        String membershipVC = Signatory.Companion.getService().issue(w3CCredentialBuilder, createProofConfig(issuedDid.getId(), holderDid.getId(), ProofType.LD_PROOF, expiration), w3CIssuer, false);
 
-        //save cred
-        Map<String, String> mapVal = new ObjectMapper().readValue(membershipVC, Map.class);
+        String membershipVC = null;
+        if(asJwt){
+            membershipVC = Signatory.Companion.getService().issue(w3CCredentialBuilder, createProofConfig(issuedDid.getId(), holderDid.getId(), ProofType.JWT, expiration), w3CIssuer, false);
+        }else{
+            membershipVC = Signatory.Companion.getService().issue(w3CCredentialBuilder, createProofConfig(issuedDid.getId(), holderDid.getId(), ProofType.LD_PROOF, expiration), w3CIssuer, false);
+        }
 
+        //save VC in wallet
+        VerifiableCredential verifiableCredential = VerifiableCredential.Companion.fromJson(membershipVC);
         holderCredentialRepository.save(HolderCredential.builder()
                         .alias("aa")
-                        .group("aa")
-                .credentialId(mapVal.get("id"))
+                        .group("MembershipCredential")
+                .credentialId(verifiableCredential.getId())
                 .data(membershipVC)
                 .issuerId(issuedDid.getId())
                 .build());
 
         return ResponseEntity.ok(membershipVC);
+    }
+
+
+    @PostMapping(path = "/vc/verify", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<VerificationResult> verifyVC(@RequestBody Map<String, Object> map) throws JsonProcessingException {
+        VerifiableCredential verifiableCredential = VerifiableCredential.Companion.fromJson(objectMapper.writeValueAsString(map));
+
+        //set schema URL, this is not working as they are following different schema type: https://raw.githubusercontent.com/walt-id/waltid-ssikit-vclib/master/src/test/resources/schemas/VerifiableId.json
+        JsonSchemaPolicyArg jsonSchemaPolicyArg = new JsonSchemaPolicyArg("https://cofinity-x.github.io/schema-registry/v1.1/businessPartnerData.json");
+        //new JsonSchemaPolicy(jsonSchemaPolicyArg) This is not working
+        VerificationResult verify = Auditor.Companion.getService().verify(verifiableCredential, List.of(new SignaturePolicy()));
+        return ResponseEntity.ok(verify);
     }
 
     @EventListener(ApplicationReadyEvent.class)

@@ -35,5 +35,5 @@ springdoc:
     path: /docs/api-docs
 
 ssi:
-  host: ${APPLICATION_HOST:localhost}
+  host: ${APPLICATION_HOST:4afe-203-129-213-107.ngrok-free.app}
   baseTenant: ${BASE_TENANT:smartSense}

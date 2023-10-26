@@ -57,7 +57,14 @@ public class MyCustomKeyStoreService extends KeyStoreService{
     public Key load(@NotNull String alias, @NotNull KeyType keyType) {
         KeyEntity keyEntity = getRepo().getByKeyAliasOrKeyId(alias, alias);
         KeyId keyId = new KeyId(keyEntity.getKeyId());
-        return CryptFunKt.buildKey(keyId.getId(), keyEntity.getAlgorithm(), keyEntity.getCryptoProvider(), keyEntity.getPublicKey(), keyEntity.getPrivateKey(), KeyFormat.PEM);
+
+        if(keyType.name().equals("PRIVATE")){
+            return CryptFunKt.buildKey(keyId.getId(), keyEntity.getAlgorithm(), keyEntity.getCryptoProvider(), keyEntity.getPublicKey(), keyEntity.getPrivateKey(), KeyFormat.PEM);
+        }else{
+            return CryptFunKt.buildKey(keyId.getId(), keyEntity.getAlgorithm(), keyEntity.getCryptoProvider(), keyEntity.getPublicKey(), null, KeyFormat.PEM);
+        }
+
+
     }
 
     @Override
