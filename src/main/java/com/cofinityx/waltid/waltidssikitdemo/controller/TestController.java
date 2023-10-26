@@ -11,17 +11,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import id.walt.auditor.Auditor;
 import id.walt.auditor.VerificationResult;
-import id.walt.auditor.policies.JsonSchemaPolicy;
-import id.walt.auditor.policies.JsonSchemaPolicyArg;
-import id.walt.auditor.policies.SignaturePolicy;
-import id.walt.credentials.w3c.VerifiableCredential;
-import id.walt.credentials.w3c.W3CContext;
-import id.walt.credentials.w3c.W3CCredentialSchema;
-import id.walt.credentials.w3c.W3CIssuer;
+import id.walt.auditor.policies.*;
+import id.walt.credentials.w3c.*;
 import id.walt.credentials.w3c.builder.W3CCredentialBuilder;
 import id.walt.credentials.w3c.templates.VcTemplateService;
 import id.walt.crypto.KeyAlgorithm;
 import id.walt.crypto.KeyId;
+import id.walt.custodian.Custodian;
 import id.walt.model.Did;
 import id.walt.model.DidMethod;
 import id.walt.services.did.DidOptions;
@@ -181,9 +177,10 @@ public class TestController {
         //set schema URL, this is not working as they are following different schema type: https://raw.githubusercontent.com/walt-id/waltid-ssikit-vclib/master/src/test/resources/schemas/VerifiableId.json
         JsonSchemaPolicyArg jsonSchemaPolicyArg = new JsonSchemaPolicyArg("https://cofinity-x.github.io/schema-registry/v1.1/businessPartnerData.json");
         //new JsonSchemaPolicy(jsonSchemaPolicyArg) This is not working
-        VerificationResult verify = Auditor.Companion.getService().verify(verifiableCredential, List.of(new SignaturePolicy()));
+        VerificationResult verify = Auditor.Companion.getService().verify(verifiableCredential, List.of(new SignaturePolicy(), new ExpirationDateAfterPolicy(), new CredentialStatusPolicy()));
         return ResponseEntity.ok(verify);
     }
+
 
     @GetMapping(path ="/{tenant}/did.json", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<id.walt.model.Did> getDidResolve(@Parameter(description = "tenant",examples = {@ExampleObject(name = "tenant", value = "smartsense", description = "tenant")}) @PathVariable(name = "tenant") String tenant) {
@@ -191,6 +188,25 @@ public class TestController {
         Validate.isNull(holderWallet).launch(new IllegalStateException("Invalid tenant"));
         Did holderDid = Did.Companion.decode(holderWallet.getDidDocument());
         return ResponseEntity.status(HttpStatus.OK).body(holderDid);
+    }
+    @PostMapping(path = "/vp", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> createVP(@RequestBody String vc,
+                                           @RequestParam(name = "tenant") String tenant,
+                                           @RequestParam(name = "asJwt", defaultValue = "false") boolean asJwt){
+        Wallet holderWallet = walletRepository.getByTenant(tenant);
+        Validate.isNull(holderWallet).launch(new IllegalArgumentException("Wallet not found"));
+
+        VerifiableCredential verifiableCredential = VerifiableCredential.Companion.fromString(vc);
+
+        String presentation = null;
+        if(asJwt){
+            var expiration = Instant.now().plus(30, ChronoUnit.MINUTES);
+            presentation = Custodian.Companion.getService().createPresentation(List.of(new PresentableCredential(verifiableCredential, null, false)), holderWallet.getDid(), null, null, null, expiration);
+        }else{
+            presentation = Custodian.Companion.getService().createPresentation(List.of(new PresentableCredential(verifiableCredential, null, false)), holderWallet.getDid(), null, null, null, null);
+
+        }
+        return ResponseEntity.ok(presentation);
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -208,9 +224,11 @@ public class TestController {
     }
 
 
+
+
     private ProofConfig createProofConfig(String issuerDid, String subjectDid, ProofType proofType, Instant expiration) {
         return new ProofConfig(issuerDid = issuerDid, subjectDid = subjectDid, null, null, proofType, null, null,
                 null, null, null, null, expiration, null, null, null, Ecosystem.DEFAULT,
-                null, "", "", null);
+                null, "revocation", "", null);
     }
 }
