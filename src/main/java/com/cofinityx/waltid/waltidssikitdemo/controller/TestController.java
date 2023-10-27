@@ -14,7 +14,6 @@ import id.walt.auditor.VerificationResult;
 import id.walt.auditor.policies.*;
 import id.walt.credentials.w3c.*;
 import id.walt.credentials.w3c.builder.W3CCredentialBuilder;
-import id.walt.credentials.w3c.templates.VcTemplateService;
 import id.walt.crypto.KeyAlgorithm;
 import id.walt.crypto.KeyId;
 import id.walt.custodian.Custodian;
@@ -183,7 +182,7 @@ public class TestController {
 
 
     @GetMapping(path ="/{tenant}/did.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<id.walt.model.Did> getDidResolve(@Parameter(description = "tenant",examples = {@ExampleObject(name = "tenant", value = "smartsense", description = "tenant")}) @PathVariable(name = "tenant") String tenant) {
+    public ResponseEntity<id.walt.model.Did> getDidResolve(@Parameter(description = "tenant",examples = {@ExampleObject(name = "tenant", value = "smartSense", description = "tenant")}) @PathVariable(name = "tenant") String tenant) {
         Wallet holderWallet = walletRepository.getByTenant(tenant);
         Validate.isNull(holderWallet).launch(new IllegalStateException("Invalid tenant"));
         Did holderDid = Did.Companion.decode(holderWallet.getDidDocument());
@@ -207,6 +206,11 @@ public class TestController {
 
         }
         return ResponseEntity.ok(presentation);
+    }
+
+    @GetMapping(path ="/vc", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<HolderCredential>> getVC() {
+        return ResponseEntity.status(HttpStatus.OK).body(holderCredentialRepository.findAll());
     }
 
     @EventListener(ApplicationReadyEvent.class)
