@@ -127,7 +127,7 @@ public class TestController {
         //set subject
         Map<String, ? extends Serializable> subject = Map.of("holderIdentifier", tenant,
                 "startTime", simpleDateFormat.format(new Date()),
-                "memberOf", "Catena-X",
+                "memberOf", "Cf-X",
                 "id", holderDid.getId(),
                 "type", "MembershipCredential",
                 "status", "Active");
@@ -167,6 +167,7 @@ public class TestController {
                 .credentialId(verifiableCredential.getId())
                 .data(membershipVC)
                 .issuerId(issuedDid.getId())
+                .holderTenant(tenant)
                 .build());
 
         return ResponseEntity.ok(membershipVC);
@@ -224,10 +225,16 @@ public class TestController {
         return ResponseEntity.ok(presentation);
     }
 
-    @GetMapping(path ="/vc", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path ="/vc/{tenant}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(tags = "Verifiable credential", description = "Get Verifiable credential")
-    public ResponseEntity<List<VerifiableCredential>> getVC() {
-        List<HolderCredential> all = holderCredentialRepository.findAll();
+    public ResponseEntity<List<VerifiableCredential>> getVC( @RequestParam(required = false) @Parameter(description = "tenant",examples = {@ExampleObject(name = "tenant", value = "smartSense", description = "tenant")}) @PathVariable(name = "tenant") String tenant) {
+        Wallet holderWallet = walletRepository.getByTenant(tenant);
+        List<HolderCredential> all;
+        if(holderWallet == null){
+            all = holderCredentialRepository.findAll();
+        }else{
+            all = holderCredentialRepository.getByHolderTenant(tenant);
+        }
         return ResponseEntity.status(HttpStatus.OK).body(all.stream().map((vc) -> {
             return VerifiableCredential.Companion.fromString(vc.getData());
         }).toList());
