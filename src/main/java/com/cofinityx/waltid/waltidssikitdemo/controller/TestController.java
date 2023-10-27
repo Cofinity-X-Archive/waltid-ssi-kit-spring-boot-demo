@@ -27,6 +27,7 @@ import id.walt.signatory.Ecosystem;
 import id.walt.signatory.ProofConfig;
 import id.walt.signatory.ProofType;
 import id.walt.signatory.Signatory;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import kotlin.Unit;
@@ -71,6 +72,7 @@ public class TestController {
     }
 
     @PostMapping(path = "/wallet", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(tags = "Wallet", description = "Create wallet")
     public ResponseEntity<String> createWallet(@RequestBody DidDocumentRequest didDocumentRequest){
 
         Wallet wallet = walletRepository.getByTenant(didDocumentRequest.getTenant());
@@ -98,6 +100,7 @@ public class TestController {
 
     @SneakyThrows
     @PostMapping(path = "/vc/membership")
+    @Operation(tags = "Verifiable credential", description = "Issue membership credential using base wallet/tenant")
     public ResponseEntity<String> issueVC(@RequestParam(name = "holderTenant") String tenant, @RequestParam(name = "asJwt", defaultValue = "false") boolean asJwt){
 
         //holder wallet
@@ -171,6 +174,7 @@ public class TestController {
 
 
     @PostMapping(path = "/vc/verify", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(tags = "Verifiable credential", description = "Verify credential")
     public ResponseEntity<VerificationResult> verifyVC(@RequestBody String vc) throws JsonProcessingException {
         VerifiableCredential verifiableCredential = VerifiableCredential.Companion.fromString(vc);
         //set schema URL, this is not working as they are following different schema type: https://raw.githubusercontent.com/walt-id/waltid-ssikit-vclib/master/src/test/resources/schemas/VerifiableId.json
@@ -182,13 +186,25 @@ public class TestController {
 
 
     @GetMapping(path ="/{tenant}/did.json", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(tags = "Did Document", description = "Resolve did document")
     public ResponseEntity<id.walt.model.Did> getDidResolve(@Parameter(description = "tenant",examples = {@ExampleObject(name = "tenant", value = "smartSense", description = "tenant")}) @PathVariable(name = "tenant") String tenant) {
         Wallet holderWallet = walletRepository.getByTenant(tenant);
         Validate.isNull(holderWallet).launch(new IllegalStateException("Invalid tenant"));
         Did holderDid = Did.Companion.decode(holderWallet.getDidDocument());
         return ResponseEntity.status(HttpStatus.OK).body(holderDid);
     }
+
+
+    @PostMapping(path = "/vp/verify")
+    @Operation(tags = "Verifiable presentation", description = "Verify presentation")
+    public ResponseEntity<VerificationResult> verifyVP(@RequestBody String vp){
+        VerifiablePresentation verifiablePresentation = VerifiablePresentation.Companion.fromString(vp);
+        VerificationResult verify = Auditor.Companion.getService().verify(verifiablePresentation, List.of(new SignaturePolicy(), new ExpirationDateAfterPolicy()));
+        return ResponseEntity.ok(verify);
+    }
+
     @PostMapping(path = "/vp", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(tags = "Verifiable presentation", description = "Create Verify presentation")
     public ResponseEntity<String> createVP(@RequestBody String vc,
                                            @RequestParam(name = "tenant") String tenant,
                                            @RequestParam(name = "asJwt", defaultValue = "false") boolean asJwt){
@@ -209,8 +225,12 @@ public class TestController {
     }
 
     @GetMapping(path ="/vc", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<HolderCredential>> getVC() {
-        return ResponseEntity.status(HttpStatus.OK).body(holderCredentialRepository.findAll());
+    @Operation(tags = "Verifiable credential", description = "Get Verifiable credential")
+    public ResponseEntity<List<VerifiableCredential>> getVC() {
+        List<HolderCredential> all = holderCredentialRepository.findAll();
+        return ResponseEntity.status(HttpStatus.OK).body(all.stream().map((vc) -> {
+            return VerifiableCredential.Companion.fromString(vc.getData());
+        }).toList());
     }
 
     @EventListener(ApplicationReadyEvent.class)

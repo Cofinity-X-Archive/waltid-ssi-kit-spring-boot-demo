@@ -1,4 +1,4 @@
-package com.cofinityx.waltid.waltidssikitdemo;
+package com.cofinityx.waltid.waltidssikitdemo.config;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
