@@ -45,6 +45,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Stream;
 
 @RestController
 @Slf4j
@@ -69,6 +70,12 @@ public class TestController {
         this.objectMapper = objectMapper;
         simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
+
+    @GetMapping(path ="/wallet", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(tags = "Wallet", description = "Get wallets")
+    public ResponseEntity<List<Wallet>> getWallet(){
+        return ResponseEntity.status(HttpStatus.OK).body(walletRepository.findAll());
     }
 
     @PostMapping(path = "/wallet", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)

@@ -1,5 +1,6 @@
 package com.cofinityx.waltid.waltidssikitdemo.dao;
 
+import com.cofinityx.waltid.waltidssikitdemo.utils.StringToDidDocumentConverter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.smartsensesolutions.java.commons.base.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -29,6 +30,7 @@ public class Wallet implements BaseEntity {
     private String did;
 
     @Column(nullable = false)
+    @Convert(converter = StringToDidDocumentConverter.class)
     private String didDocument;
 
 }

@@ -34,4 +34,7 @@ public class HolderCredential implements BaseEntity {
 
     @Column(nullable = false)
     private String issuerId;
+
+    @Column(nullable = false)
+    private String holderTenant;
 }
