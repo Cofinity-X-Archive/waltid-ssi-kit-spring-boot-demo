@@ -95,7 +95,7 @@ public class TestController {
 
         //save wallet
         walletRepository.save(Wallet.builder()
-                .didDocument(did.encodePretty())
+                .didDocument(did)
                 .did(didString)
                 .name(didDocumentRequest.getName())
                 .tenant(didDocumentRequest.getTenant())
@@ -113,12 +113,12 @@ public class TestController {
         //holder wallet
         Wallet holderWallet = walletRepository.getByTenant(tenant);
         Validate.isNull(holderWallet).launch(new IllegalStateException("Invalid tenant"));
-        Did holderDid = Did.Companion.decode(holderWallet.getDidDocument());
+        Did holderDid = holderWallet.getDidDocument();
 
         //issuer wallet
         Wallet issuerWallet = walletRepository.getByTenant(applicationSettings.baseTenant());
         Validate.isNull(issuerWallet).launch(new IllegalStateException("Issuer wallet not found"));
-        Did issuedDid = Did.Companion.decode(issuerWallet.getDidDocument());
+        Did issuedDid = issuerWallet.getDidDocument();
 
         // DidService.kt is using local cache, so we have to store did first, already asked in discord
         DidService.INSTANCE.storeDid(Objects.requireNonNull(issuedDid));
@@ -198,7 +198,7 @@ public class TestController {
     public ResponseEntity<id.walt.model.Did> getDidResolve(@Parameter(description = "tenant",examples = {@ExampleObject(name = "tenant", value = "smartSense", description = "tenant")}) @PathVariable(name = "tenant") String tenant) {
         Wallet holderWallet = walletRepository.getByTenant(tenant);
         Validate.isNull(holderWallet).launch(new IllegalStateException("Invalid tenant"));
-        Did holderDid = Did.Companion.decode(holderWallet.getDidDocument());
+        Did holderDid = holderWallet.getDidDocument();
         return ResponseEntity.status(HttpStatus.OK).body(holderDid);
     }
 
