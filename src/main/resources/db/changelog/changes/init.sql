@@ -31,6 +31,7 @@ CREATE TABLE public.holder_credential (
 	group_name varchar(255) NOT NULL,
 	data text NOT NULL,
 	credential_id varchar(255) NOT NULL,
+	holder_tenant varchar(255) NOT NULL,
 	issuer_id varchar(255) NOT NULL,
 	CONSTRAINT holder_credential_pkey PRIMARY KEY (id)
 );
