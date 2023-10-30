@@ -19,6 +19,7 @@ import id.walt.crypto.KeyId;
 import id.walt.custodian.Custodian;
 import id.walt.model.Did;
 import id.walt.model.DidMethod;
+import id.walt.model.credential.status.StatusList2021EntryCredentialStatus;
 import id.walt.services.did.DidOptions;
 import id.walt.services.did.DidService;
 import id.walt.services.did.DidWebCreateOptions;
@@ -27,6 +28,9 @@ import id.walt.signatory.Ecosystem;
 import id.walt.signatory.ProofConfig;
 import id.walt.signatory.ProofType;
 import id.walt.signatory.Signatory;
+import id.walt.signatory.revocation.StatusListEntryFactory;
+import id.walt.signatory.revocation.StatusListEntryFactoryParameter;
+import id.walt.signatory.revocation.statuslist2021.StatusList2021EntryClientService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -45,7 +49,6 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Stream;
 
 @RestController
 @Slf4j
@@ -62,12 +65,18 @@ public class TestController {
 
     private final SimpleDateFormat simpleDateFormat;
 
-    public TestController(KeyService keyService, ApplicationSettings applicationSettings, WalletRepository walletRepository,HolderCredentialRepository holderCredentialRepository, ObjectMapper objectMapper) {
+    private final  StatusListEntryFactory statusListEntryFactory;
+
+    private final StatusList2021EntryClientService statusList2021EntryClientService;
+
+    public TestController(KeyService keyService, ApplicationSettings applicationSettings, WalletRepository walletRepository, HolderCredentialRepository holderCredentialRepository, ObjectMapper objectMapper, StatusListEntryFactory statusListEntryFactory, StatusList2021EntryClientService statusList2021EntryClientService) {
         this.keyService = keyService;
         this.applicationSettings = applicationSettings;
         this.walletRepository = walletRepository;
         this.holderCredentialRepository = holderCredentialRepository;
         this.objectMapper = objectMapper;
+        this.statusListEntryFactory = statusListEntryFactory;
+        this.statusList2021EntryClientService = statusList2021EntryClientService;
         simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
@@ -158,6 +167,22 @@ public class TestController {
 
         //set issuer
         W3CIssuer w3CIssuer = new W3CIssuer(issuedDid.getId());
+
+
+        //revocation
+
+        String credentialUrl = "http://localhost:8085/api/v1/revocations/credentials";
+        String extendedCredentialUrl = new StringBuilder(credentialUrl)
+                .append("/")
+                .append(issuedDid.getId())
+                .append("-")
+                .append("Revocation")
+                .toString();
+
+
+        StatusListEntryFactoryParameter revocation = new StatusListEntryFactoryParameter(extendedCredentialUrl, "Revocation");
+        StatusList2021EntryCredentialStatus statusList2021EntryCredentialStatus = statusListEntryFactory.create(revocation);
+
 
         String membershipVC = null;
         if(asJwt){

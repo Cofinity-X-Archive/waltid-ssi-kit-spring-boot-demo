@@ -17,3 +17,4 @@
 4. Can not add Type in list
 5. Not sure about signatory.conf file
 6. Web did resolution not happening over the internet
+7. Revocation supports only did:key method and did storage not support SQL(Same as point 1). Can we us same did:web for revocation?

@@ -8,6 +8,10 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.smartsensesolutions.java.commons.specification.SpecificationUtil;
 import id.walt.servicematrix.ServiceMatrix;
 import id.walt.services.key.KeyService;
+import id.walt.signatory.revocation.StatusListEntryFactory;
+import id.walt.signatory.revocation.statuslist2021.StatusList2021EntryClientService;
+import id.walt.signatory.revocation.statuslist2021.StatusListCredentialStorageService;
+import id.walt.signatory.revocation.statuslist2021.StatusListIndexService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
 import org.springdoc.core.properties.SwaggerUiConfigProperties;
@@ -71,6 +75,17 @@ public class ApplicationConfig implements WebMvcConfigurer {
             log.info("Set landing page to path {}", StringEscapeUtils.escapeJava(redirectUri));
             registry.addRedirectViewController("/", redirectUri);
         }
+    }
+
+    @Bean
+    public StatusListEntryFactory getStatusListEntryFactory(){
+        return new StatusListEntryFactory(StatusListIndexService.Companion.getService(),
+                StatusListCredentialStorageService.Companion.getService());
+    }
+
+    @Bean
+    public StatusList2021EntryClientService getStatusList2021EntryClientService(){
+        return new StatusList2021EntryClientService();
     }
 
 }
